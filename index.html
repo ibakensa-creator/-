@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>容器照合システム｜バーコード＋画像</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <p class="eyebrow">BARCODE + IMAGE CHECK</p>
+      <h1>容器照合システム</h1>
+      <p class="intro">バーコード①の登録コードと、カメラで撮影した容器の画像を照合します。</p>
+    </header>
+
+    <section class="panel">
+      <h2>1. バーコードを読み取る</h2>
+      <form id="barcodeForm" novalidate>
+        <div class="field">
+          <label for="barcode1">バーコード①</label>
+          <input type="text" id="barcode1" autocomplete="off" inputmode="numeric"
+            placeholder="1つ目のバーコードを読み取り">
+        </div>
+        <p class="help">バーコード①を読み取ると、末尾3桁から容器の種類を判定します。その後、カメラで撮影して照合します。</p>
+        <button type="submit" class="primary">バーコード①を確認</button>
+      </form>
+      <div id="barcodeStatus" class="status neutral" role="status" aria-live="polite">
+        バーコード①を読み取ってください。
+      </div>
+      <details>
+        <summary>バーコードの読み取り内容</summary>
+        <p id="barcodeDebug" class="help">読み取った末尾3桁がここに表示されます。</p>
+      </details>
+    </section>
+
+    <section class="panel">
+      <h2>2. カメラで容器を撮影</h2>
+      <p class="help">容器全体が画面に入り、背景と区別できるように撮影してください。</p>
+      <div class="camera-frame">
+        <video id="camera" autoplay playsinline muted></video>
+        <div id="cameraPlaceholder" class="camera-placeholder">
+          <span class="camera-icon">◎</span>
+          <span>カメラを起動して撮影します</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" id="startCamera" class="primary">カメラを起動</button>
+        <button type="button" id="captureButton" class="secondary" disabled>撮影して判定</button>
+        <button type="button" id="stopCamera" class="secondary" disabled>カメラ停止</button>
+      </div>
+      <canvas id="snapshot" hidden></canvas>
+      <div id="imageStatus" class="status neutral" role="status" aria-live="polite">
+        まずカメラを起動してください。
+      </div>
+      <div id="predictions" class="predictions" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <h2>3. 照合結果</h2>
+      <div id="finalResult" class="final-result neutral" role="status" aria-live="polite">
+        バーコード①の確認と画像判定が終わると、ここに結果が表示されます。
+      </div>
+      <p class="safety-note">注意：画像AIは誤判定する場合があります。この試作版は補助確認用です。結果だけで検体・容器の適合性を確定せず、施設の手順に従って目視確認してください。</p>
+    </section>
+
+    <section class="panel">
+      <h2>登録コード</h2>
+      <ul class="code-list">
+        <li><code>091</code><span>血ガス容器</span></li>
+        <li><code>518</code><span>PN2</span></li>
+        <li><code>007</code><span>尿コップ</span></li>
+      </ul>
+    </section>
+
+    <section class="panel setup">
+      <h2>Teachable Machineモデル設定</h2>
+      <p>画像判定を使うには、3種類の容器を学習させたTeachable Machineの<strong>画像プロジェクト</strong>が必要です。</p>
+      <label for="modelUrl">モデルURL（任意）</label>
+      <input id="modelUrl" type="url" value="https://teachablemachine.withgoogle.com/models/GWbRVGZwk/" placeholder="https://teachablemachine.withgoogle.com/models/XXXXXXXXX/">
+      <button type="button" id="loadModel" class="secondary">モデルを読み込む</button>
+      <p id="modelStatus" class="help">まだモデルは読み込まれていません。モデルURLはこのブラウザ内で使用します。</p>
+      <p class="help">クラス名は「血ガス容器」「PN2」「尿コップ」と完全一致させるのがおすすめです。異なる名前の場合は、モデルのクラス名に合わせて app.js の対応表を変更してください。</p>
+    </section>
+
+    <footer>容器照合システム 試作版</footer>
+  </main>
+</body>
+</html>
